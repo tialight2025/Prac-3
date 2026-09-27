@@ -1,0 +1,210 @@
+---
+title: "Practical 3 Answers"
+subtitle: "Working with Data: Exploratory Data Analysis"
+author: "Your Name Here"
+date: today
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-fold: false
+    link-external-newwindow: true
+    link-external-icon: true
+editor: source
+---
+
+<!--
+Before you start:
+
+- This practical uses the `penguins` dataset from the `palmerpenguins`
+  package — there's no .csv to download this week, just an install
+  (see the README for instructions).
+- See the README.md in this repository for package installation instructions
+  and Git/GitHub tips.
+- Render this document with the "Render" button in RStudio, or by running
+  quarto::quarto_render("practical3-answers.qmd") in the R console.
+-->
+
+## Getting started
+
+```{r}
+#| label: setup
+#| message: false
+#| warning: false
+
+# Load the packages you need for this practical.
+# See the README for installation instructions if any of these are missing.
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(naniar)
+library(palmerpenguins)
+library(GGally)
+```
+
+## Palmer Penguins
+
+### Question 1
+
+Use the `naniar` package to inspect missingness. Are there any variables where missingness is high and this should be monitored?
+
+_You can use `naniar::gg_miss_upset(...)` or other functions you've come across but you should carefully interpret the output, and review the raw data to confirm.^[There may be some warnings that you can safely ignore.]_
+
+```{r}
+#| label: inspect-missingness
+
+```
+
+
+
+
+### Question 2
+
+Summarise the data variables in the dataset. What variables exist? What are their ranges, means etc? Hint: you can start by using `glimpse()` and `summary()`. You may also look at the whole dataset using `View()` in RStudio.
+
+```{r}
+#| label: summarise-variables
+
+```
+
+
+
+
+## Basic Plotting
+
+### Question 3
+
+Using `geom_histogram()`, plot the distribution of `flipper_length_mm`. What shape does the distribution appear to have? Use the starter code below and change the theme with `theme_bw()`.
+
+```{r}
+#| label: histogram-flipper-length
+
+ggplot(penguins, aes(x = flipper_length_mm)) +
+  geom_histogram()
+```
+
+
+
+
+### Question 4
+
+The default bin width is rarely ideal. Experiment with the `binwidth` argument in `geom_histogram(...)`. How does your choice of bin width change your interpretation of the distribution?
+
+```{r}
+#| label: histogram-binwidth
+
+```
+
+
+
+
+### Question 5
+
+Using `geom_bar()`, visualise the count of penguins belonging to each species. Which species is most common in this dataset?
+
+```{r}
+#| label: bar-species-count
+
+# ggplot(...) + geom_bar(aes(x = ... ))
+
+```
+
+
+
+
+### Question 6
+
+Modify your bar chart to map the `fill` aesthetic to `island`. What does the resulting stacked bar tell you about where each species was sampled? Try `position = "dodge"` in `geom_bar()`, which version is appropriate and when?
+
+```{r}
+#| label: bar-species-island
+
+```
+
+
+
+
+### Question 7
+
+Use `geom_boxplot()` to compare the distribution of `body_mass_g` across the three species. Map `species` to the x-axis and `body_mass_g` to the y-axis.
+
+```{r}
+#| label: boxplot-mass-species
+
+```
+
+### Question 8
+
+Map the `fill` aesthetic in your previous boxplot to `sex`. What happens to the number of boxes, and what new comparison does this enable?
+
+```{r}
+#| label: boxplot-mass-species-sex
+
+```
+
+
+
+
+### Question 9
+
+Remove the missing values in the previous plot by filtering. Is this good practice? When should missing values be removed?
+
+```{r}
+#| label: boxplot-remove-missing
+
+# add filter for other column with missing data
+penguins |> filter(is.na(sex))
+
+# Or (use carefully) look at tidyr::drop_na() 
+
+```
+
+
+
+
+## Advanced Plotting
+
+### Question 10
+
+Recreate the above plot using `geom_point()`. Describe the overall relationship between these two variables and its dependence on species.
+
+```{r}
+#| label: scatter-mass-species
+
+```
+
+
+
+
+### Question 11
+
+Change the previous plot so that each species is plotted separately using `facet_wrap()`. When would using facets be more appropriate than colours to distinguish categories? Try using the `scales = "free"` argument for `facet_wrap()` — when would this be helpful or inappropriate?
+
+```{r}
+#| label: facet-species
+
+```
+
+
+
+
+### Question 12
+
+Use the `ggscatmat()` function from `GGally` to plot a scatter plot matrix of pairwise relations between continuous variables.
+
+```{r}
+#| label: scatmat-continuous
+
+```
+
+### Question 13
+
+Add colouring by species to the `ggscatmat()` plot. From the plot, identify which two variables are likely to best distinguish each species. Are there any anomalies in the data?
+
+```{r}
+#| label: scatmat-species-colour
+
+```
+
+
+

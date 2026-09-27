@@ -53,6 +53,16 @@ _You can use `naniar::gg_miss_upset(...)` or other functions you've come across 
 ```{r}
 #| label: inspect-missingness
 
+# How many missing values for each variable
+naniar::miss_var_summary(penguins)
+
+# Where are the missing values in the data set
+naniar::vis_miss(penguins)
+
+# Which variables tend to be missing together
+naniar::gg_miss_upset(penguins)
+
+
 ```
 
 
@@ -64,6 +74,19 @@ Summarise the data variables in the dataset. What variables exist? What are thei
 
 ```{r}
 #| label: summarise-variables
+
+glimpse(penguins)
+
+summary(penguins)
+
+penguins |> count(species)
+
+penguins |> count(island)
+
+penguins |> count(sex)
+
+penguins |> count(year)
+
 
 ```
 
@@ -80,7 +103,10 @@ Using `geom_histogram()`, plot the distribution of `flipper_length_mm`. What sha
 #| label: histogram-flipper-length
 
 ggplot(penguins, aes(x = flipper_length_mm)) +
-  geom_histogram()
+  geom_histogram() + 
+  theme_bw()
+
+## The distribution is not unimodal (e.g., like a bell curve). It looks to be bimodal, or even trimodal, with a cluster of shorter flippers (~180-195mm) and a separate cluster of longer flippers (~210-230mm), and a less distinct middle. This is a hint that flipper length differs systematically by some other variable in the data rather than representing one homogeneous population.
 ```
 
 
@@ -93,6 +119,25 @@ The default bin width is rarely ideal. Experiment with the `binwidth` argument i
 ```{r}
 #| label: histogram-binwidth
 
+ggplot(penguins, aes(x = flipper_length_mm)) +
+  geom_histogram(binwidth = 10) +
+  ggtitle("binwidth = 10") +
+  theme_bw()
+
+ggplot(penguins, aes(x = flipper_length_mm)) +
+  geom_histogram(binwidth = 2) +
+  ggtitle("binwidth = 2") +
+  theme_bw()
+
+ggplot(penguins, aes(x = flipper_length_mm)) + 
+  geom_histogram(binwidth = 0.5) + 
+  ggtitle("binwidth = 0.5") + 
+  theme_bw()
+
+## Choice of bin width can hide or reveal structure in the data:
+## Too wide a bin (e.g. binwidth = 10, meaning collect in 10mm bins) smooths right over the multiple clusters and can make the data look unimodal.
+## A moderate bin width (e.g. binwidth = 2) is what reveals the multimodal shape clearly.
+## Too narrow a bin (e.g. binwidth = 0.5) startsshowing gaps and noise from individual measurement values.
 ```
 
 
@@ -105,7 +150,11 @@ Using `geom_bar()`, visualise the count of penguins belonging to each species. W
 ```{r}
 #| label: bar-species-count
 
-# ggplot(...) + geom_bar(aes(x = ... ))
+ggplot(penguins, aes(x = species)) + 
+  geom_bar() + 
+  scale_x_discrete("Species") + 
+  scale_y_continuous("Count") + 
+  theme
 
 ```
 
@@ -119,6 +168,33 @@ Modify your bar chart to map the `fill` aesthetic to `island`. What does the res
 ```{r}
 #| label: bar-species-island
 
+# Stacked (default position = "stack")
+ggplot(penguins, aes(x = species, fill = island)) +
+  geom_bar() +
+  scale_x_discrete("Species") +
+  scale_y_continuous("Count") +
+  scale_fill_discrete("Island") +
+  ggtitle("Stacked version") +
+  theme_bw()
+
+ggplot(penguins, aes(x = species, fill = island)) + 
+  geom_bar(position = "dodge") + 
+  scale_x_discrete("Species") + 
+  scale_y_continuous("Count") + 
+  scale_fill_discrete("Island") + 
+  ggtitle("Dodged version") +
+  theme_bw()
+
+# Dodged version 2
+ggplot(penguins, aes(x = species, fill = island)) +
+  geom_bar(position = position_dodge(preserve = "single")) +
+  scale_x_discrete("Species") +
+  scale_y_continuous("Count") +
+  scale_fill_discrete("Island") +
+  ggtitle("Dodged 2.0") +
+  theme_bw()
+
+
 ```
 
 
@@ -131,6 +207,14 @@ Use `geom_boxplot()` to compare the distribution of `body_mass_g` across the thr
 ```{r}
 #| label: boxplot-mass-species
 
+
+ggplot(penguins, aes(x = species, y = body_mass_g)) + 
+  geom_boxplot() + 
+  scale_x_discrete("Species") + 
+  scale_y_continuous("Body Mass in grams") + 
+  theme_bw()
+
+
 ```
 
 ### Question 8
@@ -139,6 +223,13 @@ Map the `fill` aesthetic in your previous boxplot to `sex`. What happens to the 
 
 ```{r}
 #| label: boxplot-mass-species-sex
+
+ggplot(penguins, aes(x = species, y = body_mass_g, fill = sex)) + 
+  geom_boxplot() + 
+  scale_x_discrete("Species") + 
+  scale_y_continuous("Body Mass in grams") + 
+  theme_bw()
+
 
 ```
 
@@ -152,10 +243,14 @@ Remove the missing values in the previous plot by filtering. Is this good practi
 ```{r}
 #| label: boxplot-remove-missing
 
-# add filter for other column with missing data
-penguins |> filter(is.na(sex))
-
-# Or (use carefully) look at tidyr::drop_na() 
+penguins |>
+  filter(!is.na(sex)) |>
+  ggplot(aes(x = species, y = body_mass_g, fill = sex)) +
+  geom_boxplot() +
+  scale_x_discrete("Species") +
+  scale_y_continuous("Body mass (g)") +
+  scale_fill_discrete("Sex") +
+  theme_bw()
 
 ```
 
@@ -171,6 +266,14 @@ Recreate the above plot using `geom_point()`. Describe the overall relationship 
 ```{r}
 #| label: scatter-mass-species
 
+penguins |> 
+  filter(!is.na(sex)) |> 
+  ggplot(aes(x = species, y = body_mass_g, colour = sex)) + 
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.6) + 
+  scale_x_discrete("species") + 
+  scale_y_continuous("body mass in grams") + 
+  scale_colour_discrete("Sex") +
+  theme_bw()
 ```
 
 
@@ -182,6 +285,27 @@ Change the previous plot so that each species is plotted separately using `facet
 
 ```{r}
 #| label: facet-species
+
+penguins |>
+  filter(!is.na(sex)) |>
+  ggplot(aes(x = sex, y = body_mass_g, colour = sex)) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.6) +
+  facet_wrap(~species) +
+  scale_x_discrete("Sex") +
+  scale_y_continuous("Body mass (g)") +
+  scale_colour_discrete("Sex") +
+  theme_bw()
+
+# Same plot as before, but letting each facet's y-axis scale independently
+penguins |>
+  filter(!is.na(sex)) |>
+  ggplot(aes(x = sex, y = body_mass_g, colour = sex)) +
+  geom_point(position = position_jitter(width = 0.2), alpha = 0.6) +
+  facet_wrap(~species, scales = "free") +
+  scale_x_discrete("Sex") +
+  scale_y_continuous("Body mass (g)") +
+  scale_colour_discrete("Sex") +
+  theme_bw()
 
 ```
 
@@ -195,6 +319,8 @@ Use the `ggscatmat()` function from `GGally` to plot a scatter plot matrix of pa
 ```{r}
 #| label: scatmat-continuous
 
+GGally::ggscatmat(penguins, columns = c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"))
+
 ```
 
 ### Question 13
@@ -204,6 +330,11 @@ Add colouring by species to the `ggscatmat()` plot. From the plot, identify whic
 ```{r}
 #| label: scatmat-species-colour
 
+GGally::ggscatmat(
+  penguins,
+  columns = c("bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"),
+  color = "species"
+)
 ```
 
 
